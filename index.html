@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>3-Card Match Memory Game</title>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background: #f4f4f4;
+    }
+
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(3, 120px);
+        gap: 15px;
+    }
+
+    .card {
+        width: 120px;
+        height: 120px;
+        background: #444;
+        color: white;
+        font-size: 32px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 10px;
+        cursor: pointer;
+        user-select: none;
+        transition: transform 0.3s;
+        transform-style: preserve-3d;
+        position: relative;
+    }
+
+    .card.flip {
+        background: white;
+        color: black;
+        transform: rotateY(180deg);
+    }
+
+    .hidden {
+        visibility: hidden;
+    }
+</style>
+</head>
+<body>
+
+<div class="grid" id="grid"></div>
+
+<script>
+    // 9 cards, 3 sets of 3 identical values
+    let values = [1,1,1,  2,2,2,  3,3,3];
+
+    // shuffle
+    values = values.sort(() => Math.random() - 0.5);
+
+    const grid = document.getElementById("grid");
+    let openedCards = [];
+    let matchedCount = 0;
+
+    // create cards
+    values.forEach((value, index) => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.dataset.value = value;
+        card.dataset.index = index;
+        card.innerText = "";
+        card.addEventListener("click", () => flipCard(card));
+        grid.appendChild(card);
+    });
+
+    function flipCard(card) {
+        if (card.classList.contains("flip")) return;  // avoid clicking same card
+        card.classList.add("flip");
+        card.innerText = card.dataset.value;
+
+        openedCards.push(card);
+
+        // if 3 cards opened
+        if (openedCards.length === 3) {
+            checkMatch();
+        }
+    }
+
+    function checkMatch() {
+        const [c1, c2, c3] = openedCards;
+
+        if (
+            c1.dataset.value === c2.dataset.value &&
+            c2.dataset.value === c3.dataset.value
+        ) {
+            // correct match
+            setTimeout(() => {
+                c1.classList.add("hidden");
+                c2.classList.add("hidden");
+                c3.classList.add("hidden");
+
+                matchedCount += 3;
+                openedCards = [];
+
+                if (matchedCount === 9) {
+                    setTimeout(() => alert("🎉 You matched all 3 sets!"), 500);
+                }
+            }, 500);
+        } else {
+            // wrong match → flip back
+            setTimeout(() => {
+                c1.classList.remove("flip");
+                c2.classList.remove("flip");
+                c3.classList.remove("flip");
+
+                c1.innerText = "";
+                c2.innerText = "";
+                c3.innerText = "";
+
+                openedCards = [];
+            }, 800);
+        }
+    }
+</script>
+
+</body>
+</html>
